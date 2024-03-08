@@ -1,0 +1,24 @@
+#Layer docker image - parts of the application are split into layers
+#so changes can be uploaded for each layer - useful in CI/CD processes
+FROM eclipse-temurin:17-jre as builder
+#creating-a-work-directory-known-as-extracted
+WORKDIR extracted
+#adding the executable jar file to the target folder - calling is app.jar
+ADD target/*.jar app.jar
+#launching the jar file with layertools and using extract to easily split application into layers
+RUN java -Djarmode=layertools -jar app.jar extract
+
+#ARG JAR_FILE=target/*.jar
+#COPY ${JAR_FILE} application.jar
+#RUN java -Djarmode=layertools -jar application.jar extract
+
+FROM eclipse-temurin:17-jre
+WORKDIR application
+COPY --from=builder application/dependencies/ ./
+COPY --from=builder application/spring-boot-loader/ ./
+COPY --from=builder application/snapshot-dependencies/ ./
+COPY --from=builder application/application/ ./
+EXPOSE 8080
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+
+
