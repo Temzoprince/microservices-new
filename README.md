@@ -1,0 +1,1 @@
+Project uses the microservices architecture to mimic some kind of online shopping backend system Project has different services working together to handle, creating orders of products. Products and Orders are stored in databases, MongoDB and MySQL respectively.
